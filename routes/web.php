@@ -2,6 +2,7 @@
 
 use App\Livewire\HostPanel;
 use App\Livewire\HostSession;
+use App\Livewire\ParticipantSummaryPanel;
 use App\Livewire\Welcome;
 use App\Livewire\VotePanel;
 use App\Livewire\QuestionDisplay;
@@ -30,6 +31,8 @@ Route::get('/host-panel/{session}', HostPanel::class)->name('host-panel');
 Route::get('/vote-panel/{session}/{participant}/{code}', VotePanel::class)->name('vote-panel');
 
 Route::get('/question-panel/{session}/{participant}/{question}', QuestionDisplay::class)->name('question-panel');
+
+Route::get('/participant-summary-panel/{session}/{participant}/{question}', ParticipantSummaryPanel::class)->name('participant-summary-panel');
 
 Route::get('/summary-panel/{session}/{question}', SummaryPanel::class)->name('summary-panel');
 

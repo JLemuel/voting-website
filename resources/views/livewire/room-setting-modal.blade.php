@@ -1,7 +1,5 @@
 <x-modal id="setting" title="Vote Game Setting">
-
     <x-form wire:submit="saveSetting">
-
         <x-input label="Timer" placeholder="Set Seconds" icon="o-clock" hint="Set How many seconds"
             wire:model="timerSecs" />
         <x-checkbox label="Enable Picking Random Participant" wire:model="isRandom"

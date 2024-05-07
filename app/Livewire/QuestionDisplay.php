@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Events\DisplaySummary;
 use App\Models\Room;
 use App\Models\Vote;
 use Mary\Traits\Toast;
@@ -29,6 +30,7 @@ class QuestionDisplay extends Component
     public $countdown = 3;
     public $isSetTimer = false;
     public $timerSeconds;
+    public $roomQuestionId;
 
     public function mount($session, $participant, $question)
     {
@@ -50,6 +52,7 @@ class QuestionDisplay extends Component
 
         $this->sessionId = $session;
         $this->votedBy = $participant;
+        $this->roomQuestionId = $question;
 
         $this->otherParticipants = RoomParticipant::where('room_id', $session)
             ->where('id', '!=', $participant)
@@ -168,6 +171,20 @@ class QuestionDisplay extends Component
         return $this->redirectRoute('question-panel', ['session' => $roomId, 'participant' => $this->votedBy, 'question' => $questionId]);
     }
 
+    #[On('echo:show-summary,DisplaySummary')]
+    public function displaySummaryWithoutTimer()
+    {
+        return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
+    }
+    
+    #[On('timer-ended')]
+    public function timerEnded()
+    {
+        DisplaySummary::dispatch();
+
+        return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
+    }
+
     public function render()
     {
         // dd($this->isSetTimer);
@@ -179,6 +196,7 @@ class QuestionDisplay extends Component
             'chosenParticipant' => $this->isChosenParticipant,
             'hasQuestionDetail' => $this->hasQuestionDetail,
             'isSetTimer' => $this->isSetTimer,
+            'timerSeconds' => $this->timerSeconds,
         ]);
     }
 }

@@ -8,7 +8,7 @@
         <x-progress class="my-6 progress-primary h-0.5" indeterminate />
     </div>
     @else
-    @if ($showResults)
+    @if ($showResults || $timeIsUp)
     <div class="flex flex-col items-center justify-center text-center">
         <p class="text-2xl font-bold py-4 text-info">Voting Results:</p>
         <p class="text-5xl font-black px-4 text-center">{{ preg_replace('/^\d+\.\s+/', '', $question['content'] ?? '')
@@ -33,8 +33,10 @@
     <p class="text-5xl font-black md:px-0 px-4 text-center">{{ preg_replace('/^\d+\.\s+/', '', $question['content']) }}
     </p>
     <x-progress class="my-6 progress-primary h-0.5" indeterminate />
+
     <div class="text-center">
         <p class="text-2xl font-bold mb-2">Total Participants</p>
+
         <p class="text-lg font-semibold text-gray-700">{{ $totalParticipants }}</p>
         @php
         $progressPercentage = ($totalVotes / $totalParticipants) * 100;

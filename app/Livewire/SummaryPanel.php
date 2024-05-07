@@ -2,15 +2,17 @@
 
 namespace App\Livewire;
 
-use App\Events\SetQuestion;
-use App\Events\RandomQuestionWriterSelected;
-use App\Models\RoomParticipant;
+use App\Models\Room;
 use App\Models\Vote;
-use App\Models\Question;
-use App\Models\RoomQuestion;
 use Mary\Traits\Toast;
 use Livewire\Component;
+use App\Models\Question;
+use App\Events\SetQuestion;
 use Livewire\Attributes\On;
+use App\Models\RoomQuestion;
+use App\Events\DisplaySummary;
+use App\Models\RoomParticipant;
+use App\Events\RandomQuestionWriterSelected;
 
 class SummaryPanel extends Component
 {
@@ -24,6 +26,10 @@ class SummaryPanel extends Component
     public $showResults;
     public $summary;
     public $randomParticipantSelected = false;
+    public $isSetTimer = false;
+    public $questionTimer;
+
+    public $timeIsUp;
 
     public function mount($session, $question)
     {
@@ -40,13 +46,27 @@ class SummaryPanel extends Component
             ->where('question_id', $this->questionId)
             ->count();
 
-        // dd($this->totalVotes);
+        // $this->isSetTimer();
+
+        // dd($this->isSetTimer());
 
         $this->showResults = $this->totalParticipants === $this->totalVotes;
+        // dd($this->showResults);
 
         if ($this->showResults) {
             $this->calculateSummary();
+            DisplaySummary::dispatch();
         }
+
+        if ($this->timeIsUp) {
+            $this->calculateSummary();
+        }
+    }
+
+    #[On('echo:show-summary,DisplaySummary')]
+    public function isSetTimer()
+    {
+        $this->timeIsUp = true;
     }
 
     public function calculateSummary()
@@ -180,9 +200,12 @@ class SummaryPanel extends Component
             'totalParticipants' => $this->totalParticipants,
             'totalVotes' => $this->totalVotes,
             'showResults' => $this->showResults,
+            'timeIsUp' => $this->timeIsUp,
             'summary' => $this->summary,
             'question' => $question,
             'roomId' => $roomId,
+            'isSetTimer' => $this->isSetTimer,
+            'questionTimer' => $this->questionTimer,
         ]);
     }
 }

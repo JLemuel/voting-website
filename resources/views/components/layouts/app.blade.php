@@ -24,6 +24,9 @@
                 <x-button icon="o-cog-6-tooth" class="btn-square btn-primary" onclick="setting.showModal()" />
                 @endif
             </div>
+            <div class="flex justify-center pt-10">
+                <x-theme-toggle class="btn btn-base-100" @theme-changed="console.log($event.detail)" />
+            </div>
         </div>
     </div>
 
