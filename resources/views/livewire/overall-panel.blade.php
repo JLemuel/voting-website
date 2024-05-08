@@ -1,5 +1,5 @@
 <div wire:poll.keep-alive class="flex flex-col justify-center">
-    <div class="flex flex-col items-center justify-center text-center pt-46">
+    <div class="flex flex-col items-center justify-center text-center">
         <p class="text-5xl font-black py-4 text-center">Voting Results</p>
     </div>
     <hr />

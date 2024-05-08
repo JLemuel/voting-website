@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('pick_random_participant')->default(true); // Option to enable/disable picking a random participant to create the question
             $table->unsignedInteger('num_questions');
             $table->unsignedTinyInteger('question_level');
-            $table->boolean('active')->default(false);
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

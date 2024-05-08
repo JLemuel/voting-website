@@ -33,18 +33,23 @@ class Welcome extends Component
         $room = Room::where('code', $this->code)->first();
 
         if ($room) {
-             $participant = $room->participants()->create([
-                'name' => $this->name,
-            ]);
-            
-            return $this->redirectRoute('vote-panel', [
-                'session' => $room->id,
-                'participant' => $participant->id,
-                'code' => $this->code
-            ]);
-            
-        } else {
+            // Check if the room is active
+            if ($room->active) {
+                $participant = $room->participants()->create([
+                    'name' => $this->name,
+                ]);
 
+                return $this->redirectRoute('vote-panel', [
+                    'session' => $room->id,
+                    'participant' => $participant->id,
+                    'code' => $this->code
+                ]);
+            } else {
+                // Room is not active, display a warning
+                $this->warning("The room is not active. Please try joining another room.", position: 'toast-top toast-center');
+            }
+        } else {
+            // Room not found, display a warning
             $this->warning("Room not found. Please check the room code and try again.", position: 'toast-top toast-center');
         }
     }

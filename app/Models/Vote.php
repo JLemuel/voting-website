@@ -21,4 +21,9 @@ class Vote extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    public function participant()
+    {
+        return $this->belongsTo(RoomParticipant::class, 'participant_id');
+    }
 }

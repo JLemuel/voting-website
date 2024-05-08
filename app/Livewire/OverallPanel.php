@@ -2,71 +2,77 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
+use App\Models\Room;
 use App\Models\Vote;
+use Livewire\Component;
 use App\Models\RoomParticipant;
 
 class OverallPanel extends Component
 {
     public $roomVotes;
+    public $roomId;
 
     public function mount($session)
     {
+        $this->roomId = $session;
 
-        $this->roomVotes = Vote::where('room_id', $session)->get();
+        $this->roomVotes = Vote::where('room_id', $this->roomId)->get();
     }
 
     public function endVoting()
     {
 
+        $room = Room::findOrFail($this->roomId);
+        $room->active = false;
+        $room->save();
+
         return redirect()->route('home');
     }
 
-
     public function render()
     {
+
+        $this->roomVotes->load('question', 'participant');
+
         $totalVotes = $this->roomVotes->count();
 
         $participantVotes = [];
+        $mostVotedParticipants = [];
 
-        // Count votes for each participant
         foreach ($this->roomVotes as $vote) {
             $participantId = $vote->participant_id;
+            $questionContent = $vote->question->content;
+            $participantName = $vote->participant->name;
+
             if (!isset($participantVotes[$participantId])) {
                 $participantVotes[$participantId] = 0;
             }
             $participantVotes[$participantId]++;
+
+            if (
+                !isset($mostVotedParticipants[$questionContent]) ||
+                $participantVotes[$participantId] > $participantVotes[$mostVotedParticipants[$questionContent]['participant_id']]
+            ) {
+                $mostVotedParticipants[$questionContent] = [
+                    'participant_id' => $participantId,
+                    'participant_name' => $participantName
+                ];
+            }
         }
 
         $participantPercentages = [];
 
-        // Calculate percentage of votes for each participant
         foreach ($participantVotes as $participantId => $votes) {
             $percentage = ($votes / $totalVotes) * 100;
-            $participantPercentages[RoomParticipant::find($participantId)->name] = $percentage;
+            $participantName = RoomParticipant::find($participantId)->name;
+            $participantPercentages[$participantName] = $percentage;
         }
 
-        // Find the participant with the highest percentage of votes
         $highestParticipant = collect($participantPercentages)->sortDesc()->keys()->first();
 
-        // Initialize an array to store the most voted participants for each question
-        $mostVotedParticipants = [];
-
-        // Get all the questions and their most voted participants
-        foreach ($this->roomVotes as $vote) {
-            $questionContent = $vote->question->content;
-            $participantName = RoomParticipant::find($vote->participant_id)->name;
-            if (!isset($mostVotedParticipants[$questionContent])) {
-                $mostVotedParticipants[$questionContent] = $participantName;
-            } else {
-                // Update if the new participant has more votes than the current most voted participant
-                if ($participantVotes[$vote->participant_id] > $participantVotes[RoomParticipant::where('name', $mostVotedParticipants[$questionContent])->first()->id]) {
-                    $mostVotedParticipants[$questionContent] = $participantName;
-                }
-            }
-        }
-
-        // dd($mostVotedParticipants);
+        $mostVotedParticipants = array_map(function ($item) {
+            return $item['participant_name'];
+        }, $mostVotedParticipants);
 
         return view('livewire.overall-panel', [
             'highestParticipant' => $highestParticipant,
