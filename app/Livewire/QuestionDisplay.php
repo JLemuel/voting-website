@@ -24,13 +24,17 @@ class QuestionDisplay extends Component
     public $otherParticipants;
     public $questionDetail;
     public $isChosenParticipant;
-    public $generateQuestion;
     public $hasQuestionDetail = false;
     public $startCountdown = false;
     public $countdown = 3;
     public $isSetTimer = false;
     public $timerSeconds;
     public $roomQuestionId;
+    public $displaySummary;
+    public $summary;
+    public $summaryParticipants;
+    public $totalParticipants;
+    public $totalVotes;
 
     public function mount($session, $participant, $question)
     {
@@ -111,54 +115,22 @@ class QuestionDisplay extends Component
     #[On('echo:random-participant,RandomQuestionWriterSelected')]
     public function randomParticipantSelected($randomParticipant)
     {
-
         $roomId = $randomParticipant['roomId'];
         $chosenParticipant = $randomParticipant['selectedParticipantId'];
 
-        $this->isChosenParticipant = ($chosenParticipant == $this->votedBy);
-        $this->hasQuestionDetail = true;
-
         $this->info('a random participant is chosen to create a question ', position: 'toast-top toast-center');
+
+        return $this->redirectRoute('create-question', [
+            'session' => $this->sessionId,
+            'participant' => $this->votedBy,
+            'chosenParticipant' => $chosenParticipant // Pass chosenParticipant as a separate parameter
+        ]);
     }
 
-    public function createQuestion()
+    #[On('updateDisplaySummary')]
+    public function updateDisplaySummary()
     {
-        $this->validate([
-            'generateQuestion' => 'required|string|max:255',
-        ]);
-
-        $question = Question::create([
-            'room_id' => $this->sessionId,
-            'content' => $this->generateQuestion,
-        ]);
-        $this->generateQuestion = '';
-
-        $this->success('You have created the question.', position: 'toast-top toast-center');
-
-        // $this->startCountdown = true;
-        // $this->dispatch('post-created');
-
-
-        // Update the room_question table with the latest question
-        RoomQuestion::updateOrCreate(
-            ['room_id' => $this->sessionId],
-            ['question_id' => $question->id]
-        );
-        // CountdownStarted::dispatch();
-        event(new CountdownStarted($this->sessionId, $question->id));
-    }
-
-    #[On('echo:count-start,CountdownStarted')]
-    public function showCountdown($event)
-    {
-        $roomId = $event['roomId'];
-        $questionId = $event['questionId'];
-
-        $route = route('question-panel', ['session' => $roomId, 'participant' => $this->votedBy, 'question' => $questionId]);
-
-        // dd($roomId, $questionId, $route);
-
-        $this->dispatch('post-created', ['route' => $route]);
+        $this->displaySummary = false;
     }
 
     #[On('echo:questions,SetQuestion')]
@@ -168,21 +140,77 @@ class QuestionDisplay extends Component
         $roomId = $questionData['roomId'];
         $questionId = $questionData['questionId'];
 
+        $this->displaySummary = null;
+
         return $this->redirectRoute('question-panel', ['session' => $roomId, 'participant' => $this->votedBy, 'question' => $questionId]);
     }
 
     #[On('echo:show-summary,DisplaySummary')]
     public function displaySummaryWithoutTimer()
     {
-        return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
+        $this->displaySummary = true;
+
+        $this->summaryParticipants = RoomParticipant::where('room_id', $this->sessionId)->get();
+        $this->totalParticipants = $this->summaryParticipants->count();
+        // dd($this->totalParticipants);
+        $this->totalVotes = Vote::where('room_id', $this->sessionId)
+            ->where('question_id', $this->roomQuestionId)
+            ->count();
+
+        $this->calculateSummary();
+        // return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
     }
-    
+
     #[On('timer-ended')]
     public function timerEnded()
     {
         DisplaySummary::dispatch();
 
-        return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
+        $this->displaySummary = true;
+
+        $this->summaryParticipants = RoomParticipant::where('room_id', $this->sessionId)->get();
+        $this->totalParticipants = $this->summaryParticipants->count();
+        // dd($this->totalParticipants);
+        $this->totalVotes = Vote::where('room_id', $this->sessionId)
+            ->where('question_id', $this->roomQuestionId)
+            ->count();
+
+        $this->calculateSummary();
+        // return $this->redirectRoute('participant-summary-panel', ['session' => $this->sessionId, 'participant' => $this->votedBy, 'question' => $this->roomQuestionId]);
+    }
+
+    public function calculateSummary()
+    {
+        $votes = [];
+        foreach ($this->summaryParticipants as $participant) {
+            $votes[$participant->name] = Vote::where('room_id', $this->sessionId)
+                ->where('participant_id', $participant->id)
+                ->where('question_id', $this->roomQuestionId)
+                ->count();
+        }
+
+        $total = array_sum($votes);
+        $maxPercentage = 0;
+        $this->summary = collect($votes)->map(function ($votes, $participantName) use ($total, &$maxPercentage) {
+            $percentage = $total ? round(($votes / $total) * 100, 2) : 0;
+            $maxPercentage = max($maxPercentage, $percentage);
+            return [
+                'participantName' => $participantName, // Replace $participant with $participantName
+                'percentage' => $percentage,
+            ];
+        })->sortByDesc('percentage')->values()->toArray();
+
+        foreach ($this->summary as &$participant) {
+            if ($participant['percentage'] == $maxPercentage) {
+                $participant['isHighest'] = true;
+            }
+        }
+    }
+
+    #[On('echo:show-overall,ShowOverall')]
+    public function showOverAll()
+    {
+        return redirect()->route('overall-panel', ['session' => $this->sessionId]);
     }
 
     public function render()
@@ -197,6 +225,7 @@ class QuestionDisplay extends Component
             'hasQuestionDetail' => $this->hasQuestionDetail,
             'isSetTimer' => $this->isSetTimer,
             'timerSeconds' => $this->timerSeconds,
+            'displaySummary' => $this->displaySummary,
         ]);
     }
 }

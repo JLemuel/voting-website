@@ -36,5 +36,7 @@ class RoomSettingModal extends Component
         $room->save();
 
         $this->success('Room Setting Saved', position: 'toast-top toast-center');
+
+        $this->dispatch('refreshComponent'); // Emit an event to trigger page reload
     }
 }

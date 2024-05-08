@@ -19,12 +19,12 @@
                     {{ $slot }}
                 </x-slot:content>
             </x-main>
-            <div class="flex justify-center mt-28">
+            <div class="flex justify-center mt-12">
                 @if(Route::currentRouteName() == 'host-panel')
                 <x-button icon="o-cog-6-tooth" class="btn-square btn-primary" onclick="setting.showModal()" />
                 @endif
             </div>
-            <div class="flex justify-center pt-10">
+            <div class="flex justify-center py-2">
                 <x-theme-toggle class="btn btn-base-100" @theme-changed="console.log($event.detail)" />
             </div>
         </div>
@@ -43,6 +43,10 @@
 
     <script>
         document.addEventListener('livewire:init', () => {
+
+            Livewire.on('refreshComponent', function () {
+                window.location.reload();
+            });
 
             Livewire.on('post-created', (data) => {
                 showModal();

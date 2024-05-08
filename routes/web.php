@@ -38,4 +38,4 @@ Route::get('/summary-panel/{session}/{question}', SummaryPanel::class)->name('su
 
 Route::get('/overall-panel/{session}', OverallPanel::class)->name('overall-panel');
 
-Route::get('/create-question/{session}/{participant}', CreateQuestion::class)->name('create-question');
+Route::get('/create-question/{session}/{participant}/{chosenParticipant}', CreateQuestion::class)->name('create-question');

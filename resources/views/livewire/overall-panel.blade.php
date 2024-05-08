@@ -1,9 +1,9 @@
 <div wire:poll.keep-alive class="flex flex-col justify-center">
-    <div class="flex flex-col items-center justify-center text-center">
+    <div class="flex flex-col items-center justify-center text-center pt-46">
         <p class="text-5xl font-black py-4 text-center">Voting Results</p>
     </div>
     <hr />
-    <div class="grid grid-cols-1 gap-4 mt-8">
+    <div class="grid grid-cols-1 gap-4 mt-8" style="height: 350px; overflow-y: auto;">
         @foreach($mostVotedParticipants as $question => $participant)
         <div class="bg-base-100 shadow-md rounded-lg p-4 flex justify-between items-center">
             <p class="text-2xl text-primary font-black mb-2 w-9/12">{{ preg_replace('/^\d+\.\s+/', '', $question )}}

@@ -13,6 +13,7 @@ use App\Models\RoomQuestion;
 use App\Events\DisplaySummary;
 use App\Models\RoomParticipant;
 use App\Events\RandomQuestionWriterSelected;
+use App\Events\ShowOverall;
 
 class SummaryPanel extends Component
 {
@@ -75,6 +76,7 @@ class SummaryPanel extends Component
         foreach ($this->participants as $participant) {
             $votes[$participant->name] = Vote::where('room_id', $this->roomId)
                 ->where('participant_id', $participant->id)
+                ->where('question_id', $this->questionId)
                 ->count();
         }
 
@@ -115,6 +117,8 @@ class SummaryPanel extends Component
             });
 
             if ($allQuestionsVoted) {
+                ShowOverall::dispatch();
+
                 return redirect()->route('overall-panel', ['session' => $roomId]);
             }
 
