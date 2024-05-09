@@ -13,7 +13,7 @@ class HostSession extends Component
     public $setTimer = false;
     public $numQuestions = '10';
     public $questionLevel = '1';
-    public $active = false;
+    public $active = true;
 
     protected $rules = [
         'roomName' => 'required|string',
@@ -39,9 +39,9 @@ class HostSession extends Component
     public function hostSession()
     {
         $this->validate();
-    
+
         $this->code = str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
-    
+
         $room = Room::create([
             'code' => $this->code,
             'room_name' => $this->roomName,
@@ -50,10 +50,9 @@ class HostSession extends Component
             'question_level' => $this->questionLevel,
             'active' => $this->active,
         ]);
-    
+
         $room_id = $room->id;
-    
+
         return redirect()->route('host-panel', ['session' => $room_id]);
     }
-    
 }

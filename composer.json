@@ -10,6 +10,7 @@
         "laravel/reverb": "@beta",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.4",
+        "pusher/pusher-php-server": "^7.2",
         "robsontenorio/mary": "^1.30"
     },
     "require-dev": {
