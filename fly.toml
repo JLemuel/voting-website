@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for voting-website on 2024-05-08T14:59:04+08:00
+# fly.toml app configuration file generated for voting-website on 2024-05-09T11:25:35+08:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'voting-website'
-primary_region = 'hkg'
+primary_region = 'nrt'
 console_command = 'php /var/www/html/artisan tinker'
 
 [build]
@@ -14,7 +14,11 @@ console_command = 'php /var/www/html/artisan tinker'
 
 [env]
   APP_ENV = 'production'
-  APP_URL = 'https://voting-website.fly.dev'
+  DB_CONNECTION = 'pgsql'
+  DB_HOST = "voting-website-pg.internal"
+  DB_DATABASE= "voting_website" 
+  DB_PORT = 5432
+  APP_URL = 'https://voting-website.fly.dev/'
   LOG_CHANNEL = 'stderr'
   LOG_LEVEL = 'info'
   LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
@@ -28,6 +32,16 @@ console_command = 'php /var/www/html/artisan tinker'
   auto_start_machines = true
   min_machines_running = 1
   processes = ['app']
+
+  [[http_service.routes]]
+    handle = "rewrite"
+    # Assuming /app is the location you want to proxy to
+    # Replace with your desired path if necessary
+    source = "/app/*"
+    destination = "app"
+
+[deploy]
+  release_command = "php /var/www/html/artisan migrate --force"
 
 [[vm]]
   memory = '1gb'
