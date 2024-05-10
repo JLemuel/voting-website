@@ -10,7 +10,6 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    @livewireScripts
     @livewireStyles
 </head>
 
@@ -83,6 +82,8 @@
             window.location.href = route; // Redirect to the route
         }
     </script>
+
+    @livewireScripts
 </body>
 
 </html>
