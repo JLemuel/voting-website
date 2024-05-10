@@ -14,6 +14,10 @@ window.Echo = new Echo({
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER, //added this line
 });
 
+import Alpine from "alpinejs";
+window.Alpine = Alpine;
+Alpine.start();
+
 import axios from "axios";
 window.axios = axios;
 

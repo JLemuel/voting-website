@@ -9,6 +9,7 @@
     <title>{{ isset($title) ? $title.' - '.config('app.name') : config('app.name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 
 <body class="min-h-screen font-sans antialiased bg-base-200/50 dark:bg-base-200">
@@ -37,7 +38,7 @@
     <livewire:room-setting-modal />
 
     <div id="modal17" class="fixed inset-0 z-50 flex items-center justify-center hidden backdrop-blur">
-        <div class="bg-transparent rounded-lg p-6">
+        <div class="p-6 bg-transparent rounded-lg">
             <h1 class="text-6xl font-black text-center text-primary" id="counterElement"></h1>
         </div>
     </div>
@@ -80,6 +81,8 @@
             window.location.href = route; // Redirect to the route
         }
     </script>
+    @livewireScripts
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 
 </html>
