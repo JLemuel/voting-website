@@ -36,6 +36,12 @@ WORKDIR /app
 COPY . .
 COPY --from=base /var/www/html/vendor /app/vendor
 
+# Define ARG for API_BASE_URL
+ARG API_BASE_URL
+
+# Set environment variable for Vite
+ENV VITE_API_BASE_URL $API_BASE_URL
+
 # Use yarn or npm depending on what type of
 # lock file we might find. Defaults to
 # NPM if no lock file is found.
