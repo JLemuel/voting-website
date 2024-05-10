@@ -9,7 +9,6 @@
     {{--
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> --}}
     <title>{{ isset($title) ? $title.' - '.config('app.name') : config('app.name') }}</title>
-    <script type="module" src="{{ asset('build/assets/js/app.js') }}" defer></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
