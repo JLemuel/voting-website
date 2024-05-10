@@ -9,6 +9,8 @@
     <title>{{ isset($title) ? $title.' - '.config('app.name') : config('app.name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @livewireScripts
     @livewireStyles
 </head>
 
@@ -81,8 +83,6 @@
             window.location.href = route; // Redirect to the route
         }
     </script>
-    @livewireScripts
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 
 </html>
