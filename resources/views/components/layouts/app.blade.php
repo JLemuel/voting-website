@@ -45,6 +45,8 @@
         </div>
     </div>
 
+    @livewireScripts
+
     <script>
         document.addEventListener('livewire:init', () => {
 
@@ -84,7 +86,6 @@
         }
     </script>
 
-    @livewireScripts
 </body>
 
 </html>
